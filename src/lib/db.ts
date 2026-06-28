@@ -154,7 +154,7 @@ async function queryDataApi<T>(
   const rows = (res.records ?? []).map((rec) => {
     const obj: Record<string, unknown> = {};
     rec.forEach((field, i) => {
-      obj[cols[i]] = unwrapField(field);
+      obj[cols[i]] = unwrapField(field as unknown as Record<string, unknown>);
     });
     return obj as T;
   });
