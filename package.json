@@ -15,6 +15,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "npm run db:nuke && npm run db:up && npm run db:schema && npm run db:seed",
     "verify:fixtures": "tsx scripts/verify-fixtures.ts",
+    "db:proof": "tsx scripts/db-proof.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
