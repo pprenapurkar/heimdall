@@ -1,0 +1,40 @@
+{
+  "comment": "YELLOW run — issues a refund but SKIPS the required evidence-retrieval step (no refund_policy_lookup / evidence_retrieved event). Expected: missing_evidence (warn), verdict yellow.",
+  "run_id": "bbbbbbbb-0000-0000-0000-000000000002",
+  "task_id": "22222222-2222-2222-2222-222222222222",
+  "label": "Refund without evidence",
+  "events": [
+    {
+      "seq": 1,
+      "event_type": "invoke_agent",
+      "model": "claude-3-haiku-20240307",
+      "input_tokens": 300,
+      "output_tokens": 44,
+      "cost_usd": 0.02,
+      "output_text": "Starting the refund request for order #1043.",
+      "raw_event": { "gen_ai.operation.name": "invoke_agent", "order_id": "1043" }
+    },
+    {
+      "seq": 2,
+      "event_type": "execute_tool",
+      "tool_name": "order_lookup",
+      "model": "claude-3-haiku-20240307",
+      "input_tokens": 140,
+      "output_tokens": 58,
+      "cost_usd": 0.03,
+      "output_text": "Order #1043 located: total $30.00, delivered, refund eligible.",
+      "raw_event": { "gen_ai.tool.name": "order_lookup", "order_total_usd": 30.0 }
+    },
+    {
+      "seq": 3,
+      "event_type": "execute_tool",
+      "tool_name": "issue_refund",
+      "model": "claude-3-haiku-20240307",
+      "input_tokens": 110,
+      "output_tokens": 38,
+      "cost_usd": 0.04,
+      "output_text": "Refund of $30.00 issued to the customer for order #1043.",
+      "raw_event": { "gen_ai.tool.name": "issue_refund", "refund_amount_usd": 30.0 }
+    }
+  ]
+}

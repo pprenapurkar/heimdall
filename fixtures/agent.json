@@ -1,0 +1,19 @@
+{
+  "comment": "Declared intent (C1). Synthetic data only. Stable UUIDs make re-seeding idempotent.",
+  "agent": {
+    "agent_id": "11111111-1111-1111-1111-111111111111",
+    "name": "Refund Concierge",
+    "owner": "support-ops@acme.test",
+    "risk_level": "high",
+    "policy_version": 1
+  },
+  "task": {
+    "task_id": "22222222-2222-2222-2222-222222222222",
+    "assigned_goal": "Process the customer refund request: verify the order, check it against the published refund policy, and issue a refund only within the approved limit.",
+    "allowed_tools": ["order_lookup", "refund_policy_lookup", "issue_refund"],
+    "required_steps": ["evidence_retrieved"],
+    "prohibited_actions": ["competitor_pricing_lookup", "memory_write_unverified"],
+    "prohibited_data": ["competitor_pricing"],
+    "max_budget_usd": 0.5
+  }
+}

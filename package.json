@@ -1,0 +1,37 @@
+{
+  "name": "tracejudge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aurora PostgreSQL-powered flight recorder & audit layer for AI agents",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:up": "docker compose up -d && node scripts/wait-for-db.mjs",
+    "db:down": "docker compose down",
+    "db:nuke": "docker compose down -v",
+    "db:schema": "tsx scripts/apply-schema.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:reset": "npm run db:nuke && npm run db:up && npm run db:schema && npm run db:seed",
+    "verify:fixtures": "tsx scripts/verify-fixtures.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "^3.620.0",
+    "next": "14.2.5",
+    "pg": "^8.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/pg": "^8.11.6",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}

@@ -1,0 +1,25 @@
+# Local stand-in for Aurora PostgreSQL.
+# Aurora PostgreSQL is Postgres-16 wire/feature compatible, and pgvector is the
+# same extension Aurora ships, so the schema and queries here transfer 1:1.
+# In production this container is replaced by an Aurora Serverless v2 cluster
+# reached over the RDS Data API (see src/lib/db.ts and terraform/).
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: tracejudge-db
+    environment:
+      POSTGRES_USER: tracejudge
+      POSTGRES_PASSWORD: tracejudge
+      POSTGRES_DB: tracejudge
+    ports:
+      - "5433:5432"
+    volumes:
+      - tracejudge-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracejudge -d tracejudge"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  tracejudge-pgdata:
