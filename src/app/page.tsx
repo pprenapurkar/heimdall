@@ -18,11 +18,11 @@ export default async function Home() {
   return (
     <div className="container">
       <div className="brand">
-        <h1>TraceJudge</h1>
-        <span className="tag">agent flight recorder · Aurora PostgreSQL</span>
+        <h1>Heimdall</h1>
+        <span className="tag">a flight recorder for autonomous AI agents, on Aurora PostgreSQL</span>
       </div>
       <p className="subhead">
-        We don’t use the database as storage - we use it as the agent control plane:
+        We don't use the database as storage - we use it as the agent control plane:
         trace store, semantic judge, policy engine, and tamper-evident audit ledger.
         Each run below was scored entirely in SQL (JSONB traces, pgvector similarity,
         relational policy rules, and a sha256 hash chain).

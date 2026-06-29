@@ -170,6 +170,11 @@ function unwrapField(f: Record<string, unknown>): unknown {
   if ("longValue" in f) return f.longValue;
   if ("doubleValue" in f) return f.doubleValue;
   if ("booleanValue" in f) return f.booleanValue;
+  // text[]/int[] columns (e.g. tasks.allowed_tools) come back as arrayValue.
+  if ("arrayValue" in f && f.arrayValue) {
+    const a = f.arrayValue as Record<string, unknown[]>;
+    return a.stringValues ?? a.longValues ?? a.doubleValues ?? a.booleanValues ?? [];
+  }
   return null;
 }
 

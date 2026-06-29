@@ -75,7 +75,7 @@ resource "random_password" "master" {
 }
 
 resource "aws_secretsmanager_secret" "db" {
-  name = "${var.name}/master"
+  name = "${var.name}/master-v2"
 }
 
 resource "aws_secretsmanager_secret_version" "db" {
@@ -131,7 +131,7 @@ resource "aws_rds_cluster" "this" {
   enable_http_endpoint = true # RDS Data API
 
   # Let the cluster call Bedrock from SQL (Aurora ML).
-  iam_roles = [aws_iam_role.bedrock.arn]
+  # IAM role is attached below with feature_name = "Bedrock".
 
   serverlessv2_scaling_configuration {
     min_capacity = var.min_acu
@@ -151,4 +151,11 @@ resource "aws_rds_cluster_instance" "this" {
   # Only needed for one-time psql schema apply; the Vercel app uses the Data API.
   # Set false (and clear admin_cidrs) after setup to lock the cluster down.
   publicly_accessible = var.publicly_accessible
+}
+
+# Attach the Bedrock IAM role to Aurora PostgreSQL for Aurora ML.
+resource "aws_rds_cluster_role_association" "bedrock" {
+  db_cluster_identifier = aws_rds_cluster.this.id
+  feature_name          = "Bedrock"
+  role_arn              = aws_iam_role.bedrock.arn
 }

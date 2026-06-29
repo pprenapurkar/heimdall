@@ -25,7 +25,7 @@ variable "master_username" {
 variable "engine_version" {
   description = "Aurora PostgreSQL engine version (16.x, must support Data API + pgvector)"
   type        = string
-  default     = "16.4"
+  default     = "15.17"
 }
 
 variable "min_acu" {

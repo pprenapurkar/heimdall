@@ -1,8 +1,8 @@
-# SUBMISSION.md - your step-by-step guide to ship & submit TraceJudge
+# SUBMISSION.md - your step-by-step guide to ship & submit Heimdall
 
 This is the **operator runbook** for the **H0: Hack the Zero Stack with Vercel v0 and
 AWS Databases** hackathon (Devpost: https://h01.devpost.com/). It takes the
-locally-finished TraceJudge to a live Vercel + Aurora deployment and walks every
+locally-finished Heimdall to a live Vercel + Aurora deployment and walks every
 required Devpost deliverable.
 
 - **Track:** Monetizable B2B (AI governance / compliance for regulated workflows).
@@ -156,8 +156,8 @@ vars and the OIDC role permissions.
 On the Devpost submission form, write the project description. **Must state which AWS
 database you used.** Suggested opening (edit freely):
 
-> *I built TraceJudge, a flight recorder and audit layer for AI agents, on Amazon Aurora
-> PostgreSQL. I use Aurora as the brain of the system rather than as storage: it is the
+> *I built Heimdall (the Heimdall Protocol), a flight recorder for autonomous AI agents,
+> on Amazon Aurora PostgreSQL. I use Aurora as the brain of the system rather than as storage: it is the
 > trace store (JSONB plus relational columns), the semantic judge (pgvector cosine
 > similarity), the policy engine (SQL rules), and a tamper-evident audit ledger (a
 > pgcrypto sha256 hash chain that a recursive query verifies). It decides whether an
@@ -237,8 +237,8 @@ Aurora PostgreSQL and Vercel. #H0Hackathon"*
 ## 11. Submit on Devpost
 
 1. Go to https://h01.devpost.com/ > **Enter a submission**.
-2. Fill: project name (**TraceJudge**), tagline, the **text description** (§5, names
-   Aurora), **track = Monetizable B2B**.
+2. Fill: project name (**Heimdall**), tagline (**Heimdall Protocol: A Flight Recorder for
+   Autonomous AI Agents**), the **text description** (§5, names Aurora), **track = Monetizable B2B**.
 3. Attach/paste: **demo video URL** (§6), **Vercel link + Team ID** (§7),
    **architecture diagram** (§8), **DB-usage proof screenshot(s)** (§9), **public repo
    URL**, and the **#H0Hackathon write-up URL** (§10).

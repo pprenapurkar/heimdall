@@ -91,7 +91,7 @@ export async function getRun(
            FROM agent_runs r
            JOIN tasks t ON t.task_id = r.task_id
            JOIN agents a ON a.agent_id = t.agent_id
-          WHERE r.run_id = $1`,
+          WHERE r.run_id = CAST($1 AS uuid)`,
         [runId]
       );
       if (summaryRes.rows.length === 0) return null;
@@ -104,7 +104,7 @@ export async function getRun(
       }>(
         `SELECT t.assigned_goal, t.allowed_tools, t.required_steps, t.prohibited_actions
            FROM tasks t JOIN agent_runs r ON r.task_id = t.task_id
-          WHERE r.run_id = $1`,
+          WHERE r.run_id = CAST($1 AS uuid)`,
         [runId]
       );
 
@@ -114,7 +114,7 @@ export async function getRun(
                 te.raw_event, te.created_at::text AS created_at,
                 EXISTS (SELECT 1 FROM drift_checks dc WHERE dc.evidence_event = te.event_id) AS is_drift
            FROM trace_events te
-          WHERE te.run_id = $1
+          WHERE te.run_id = CAST($1 AS uuid)
           ORDER BY te.seq`,
         [runId]
       );
@@ -122,7 +122,7 @@ export async function getRun(
       const costRes = await q<CostAfterDrift>(
         `SELECT total_cost, cost_before_drift, cost_after_drift,
                 first_drift_seq, wasted_pct
-           FROM tj_cost_after_drift($1)`,
+           FROM tj_cost_after_drift(CAST($1 AS uuid))`,
         [runId]
       );
 

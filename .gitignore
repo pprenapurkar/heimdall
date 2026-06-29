@@ -14,3 +14,6 @@ coverage/
 terraform/.terraform.lock.hcl
 *.tsbuildinfo
 next-env.d.ts
+.env*
+.Rhistory
+.Rhistory

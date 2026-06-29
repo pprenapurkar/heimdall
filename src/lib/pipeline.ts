@@ -31,7 +31,7 @@ export async function processRun(
   await withTenant(tenantId, async (q) => {
     await q(
       `UPDATE agent_runs SET state = CASE WHEN state = 'halted' THEN 'halted' ELSE 'completed' END
-        WHERE run_id = $1`,
+        WHERE run_id = CAST($1 AS uuid)`,
       [run_id]
     );
   });

@@ -69,7 +69,7 @@ export async function registerManifest(
   await withTenant(tenantId, async (q) => {
     await q(
       `INSERT INTO agents (agent_id, tenant_id, name, owner, risk_level, policy_version)
-       VALUES ($1,$2,$3,$4,$5,$6)
+       VALUES (CAST($1 AS uuid),CAST($2 AS uuid),$3,$4,$5,$6)
        ON CONFLICT (agent_id) DO UPDATE SET
          name=EXCLUDED.name, owner=EXCLUDED.owner,
          risk_level=EXCLUDED.risk_level, policy_version=EXCLUDED.policy_version`,
@@ -87,7 +87,7 @@ export async function registerManifest(
       `INSERT INTO tasks (task_id, tenant_id, agent_id, assigned_goal, allowed_tools,
                           required_steps, prohibited_actions, prohibited_data,
                           max_budget_usd, goal_embedding)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, ${goalVec === null ? "NULL" : "$10::vector"})
+       VALUES (CAST($1 AS uuid),CAST($2 AS uuid),CAST($3 AS uuid),$4,$5,$6,$7,$8,$9, ${goalVec === null ? "NULL" : "$10::vector"})
        ON CONFLICT (task_id) DO UPDATE SET
          assigned_goal=EXCLUDED.assigned_goal, allowed_tools=EXCLUDED.allowed_tools,
          required_steps=EXCLUDED.required_steps, prohibited_actions=EXCLUDED.prohibited_actions,
@@ -145,14 +145,14 @@ export async function ingestRun(
 
   return withTenant(tenantId, async (q) => {
     // Idempotent reset for this run.
-    await q(`DELETE FROM audit_chain WHERE run_id = $1`, [fixture.run_id]);
-    await q(`DELETE FROM drift_checks WHERE run_id = $1`, [fixture.run_id]);
-    await q(`DELETE FROM trace_events WHERE run_id = $1`, [fixture.run_id]);
-    await q(`DELETE FROM agent_runs WHERE run_id = $1`, [fixture.run_id]);
+    await q(`DELETE FROM audit_chain WHERE run_id = CAST($1 AS uuid)`, [fixture.run_id]);
+    await q(`DELETE FROM drift_checks WHERE run_id = CAST($1 AS uuid)`, [fixture.run_id]);
+    await q(`DELETE FROM trace_events WHERE run_id = CAST($1 AS uuid)`, [fixture.run_id]);
+    await q(`DELETE FROM agent_runs WHERE run_id = CAST($1 AS uuid)`, [fixture.run_id]);
 
     await q(
       `INSERT INTO agent_runs (run_id, tenant_id, task_id, state, label)
-       VALUES ($1,$2,$3,'running',$4)`,
+       VALUES (CAST($1 AS uuid),CAST($2 AS uuid),CAST($3 AS uuid),'running',$4)`,
       [fixture.run_id, tenantId, fixture.task_id, fixture.label ?? null]
     );
 
@@ -165,7 +165,7 @@ export async function ingestRun(
         `INSERT INTO trace_events
            (event_id, run_id, tenant_id, seq, event_type, tool_name, model,
             input_tokens, output_tokens, cost_usd, output_text, raw_event, event_embedding)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,
+         VALUES (CAST($1 AS uuid),CAST($2 AS uuid),CAST($3 AS uuid),$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,
                  ${vec === null ? "NULL" : "$13::vector"})`,
         vec === null
           ? [
@@ -200,7 +200,7 @@ export async function ingestRun(
       );
 
       // C4 - extend the hash chain in SQL (sha256(prev || canonical)).
-      await q(`SELECT tj_append_to_chain($1)`, [eventId]);
+      await q(`SELECT tj_append_to_chain(CAST($1 AS uuid))`, [eventId]);
     }
 
     if (useDbEmbeddings) await populateEventEmbeddingsInDb(q, fixture.run_id);
@@ -228,7 +228,7 @@ async function populateGoalEmbeddingInDb(q: TenantQuery, taskId: string): Promis
             json_key    => 'embedding',
             model_input => json_build_object('inputText', assigned_goal)::text
           )::vector
-      WHERE task_id = $1`,
+      WHERE task_id = CAST($1 AS uuid)`,
     [taskId, BEDROCK_EMBED_MODEL]
   );
 }
@@ -244,7 +244,7 @@ async function populateEventEmbeddingsInDb(q: TenantQuery, runId: string): Promi
             model_input => json_build_object('inputText',
                              coalesce(tool_name,'') || ' ' || coalesce(output_text,''))::text
           )::vector
-      WHERE run_id = $1 AND output_text IS NOT NULL`,
+      WHERE run_id = CAST($1 AS uuid) AND output_text IS NOT NULL`,
     [runId, BEDROCK_EMBED_MODEL]
   );
 }

@@ -19,7 +19,7 @@ export async function runCircuitBreaker(
 ): Promise<string | null> {
   return withTenant(tenantId, async (q) => {
     const res = await q<{ reason: string | null }>(
-      `SELECT tj_circuit_breaker($1, $2, $3) AS reason`,
+      `SELECT tj_circuit_breaker(CAST($1 AS uuid), CAST($2 AS numeric), CAST($3 AS int)) AS reason`,
       [runId, driftHalt, maxErrors]
     );
     return res.rows[0]?.reason ?? null;

@@ -2,7 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "TraceJudge - agent flight recorder",
+  title: "Heimdall - a flight recorder for autonomous AI agents",
   description:
     "Aurora PostgreSQL-powered audit layer that proves whether an AI agent did what it was assigned to do.",
 };

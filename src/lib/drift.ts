@@ -26,7 +26,7 @@ export async function detectDrift(
 ): Promise<string> {
   return withTenant(tenantId, async (q) => {
     const res = await q<{ verdict: string }>(
-      `SELECT tj_detect_drift($1, $2) AS verdict`,
+      `SELECT tj_detect_drift(CAST($1 AS uuid), CAST($2 AS numeric)) AS verdict`,
       [runId, threshold]
     );
     return res.rows[0].verdict;
@@ -40,7 +40,7 @@ export async function getDriftChecks(
   return withTenant(tenantId, async (q) => {
     const res = await q<DriftCheck>(
       `SELECT check_id, run_id, check_type, severity, evidence_event, score, explanation
-         FROM drift_checks WHERE run_id = $1
+         FROM drift_checks WHERE run_id = CAST($1 AS uuid)
         ORDER BY severity DESC, check_type`,
       [runId]
     );

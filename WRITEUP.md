@@ -1,6 +1,6 @@
-# How I built TraceJudge: using Aurora PostgreSQL as the brain, not the bucket
+# How I built Heimdall: using Aurora PostgreSQL as the brain, not the bucket
 
-*This is my build write-up for the H0 hackathon. I made TraceJudge as my entry. Stack is Amazon Aurora PostgreSQL plus a Next.js frontend on Vercel. #H0Hackathon*
+*This is my build write-up for the H0 hackathon. I made Heimdall (the Heimdall Protocol) as my entry, a flight recorder for autonomous AI agents. Stack is Amazon Aurora PostgreSQL plus a Next.js frontend on Vercel. #H0Hackathon*
 
 I kept coming back to one question while watching teams ship AI agents into real workflows: after an agent finishes a task, can you actually prove what it did? Most setups can't. The logs are just rows in a table that anyone with write access can edit. There's no judgment about whether the agent stayed inside its lane, and there's no way to show a record wasn't tampered with after the fact.
 
@@ -8,7 +8,7 @@ That bothered me enough to build something for it.
 
 ## What it does
 
-TraceJudge is a flight recorder for agents. You register what an agent is allowed to do (its goal, the tools it may call, the steps it must take, the actions and data that are off limits, its budget). Then you feed it the trace of what the agent actually did. It decides whether the agent drifted, and it writes a verdict you can trust because the whole record is hash-chained and verifiable.
+Heimdall is a flight recorder for agents. You register what an agent is allowed to do (its goal, the tools it may call, the steps it must take, the actions and data that are off limits, its budget). Then you feed it the trace of what the agent actually did. It decides whether the agent drifted, and it writes a verdict you can trust because the whole record is hash-chained and verifiable.
 
 I picked the B2B angle because this is most urgent for regulated teams. The EU AI Act's Article 12 becomes enforceable on August 2, 2026, and it requires high-risk AI systems to keep automatic, tamper-evident logs. Ordinary application logging does not meet that bar. The fines go up to 15 million euros or 3 percent of global turnover, so this is not a nice-to-have for the companies it applies to.
 

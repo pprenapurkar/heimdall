@@ -1,10 +1,12 @@
-# TraceJudge
+# Heimdall
 
-TraceJudge is a database-native flight recorder for AI agents. You register what an agent was allowed to do, feed it the trace of what the agent actually did, and it decides whether the agent drifted and writes a tamper-evident verdict you can trust.
+**Heimdall Protocol: A Flight Recorder for Autonomous AI Agents**
+
+Heimdall is a database-native flight recorder for autonomous AI agents. You register what an agent was allowed to do, feed it the trace of what the agent actually did, and it decides whether the agent drifted and writes a tamper-evident verdict you can trust.
 
 The core idea: Aurora PostgreSQL is not storage behind an app here. It is the trace store, the policy engine, the semantic judge, and the audit ledger. The app layer mostly ships SQL and renders the result.
 
-Why it matters: ordinary application logs are mutable and can't prove they weren't altered. The EU AI Act Article 12 (enforceable Aug 2, 2026) requires high-risk AI systems to keep automatic, traceable, tamper-evident records, with penalties up to 15M euros or 3% of global turnover. TraceJudge closes that gap, and it does the hard part in the database.
+Why it matters: ordinary application logs are mutable and can't prove they weren't altered. The EU AI Act Article 12 (enforceable Aug 2, 2026) requires high-risk AI systems to keep automatic, traceable, tamper-evident records, with penalties up to 15M euros or 3% of global turnover. Heimdall closes that gap, and it does the hard part in the database.
 
 ## Why the database is the product
 

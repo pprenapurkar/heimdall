@@ -30,7 +30,7 @@ export async function verifyChain(
   return withTenant(tenantId, async (q) => {
     const res = await q<ChainRow>(
       `SELECT seq, event_id, stored_hash, recomputed_hash, ok
-         FROM tj_verify_chain($1) ORDER BY seq`,
+         FROM tj_verify_chain(CAST($1 AS uuid)) ORDER BY seq`,
       [runId]
     );
     const rows = res.rows.map((r) => ({ ...r, ok: r.ok === true || (r.ok as unknown) === "t" }));
@@ -56,7 +56,7 @@ export async function complianceExport(
 ): Promise<Record<string, unknown> | null> {
   return withTenant(tenantId, async (q) => {
     const res = await q<{ bundle: Record<string, unknown> }>(
-      `SELECT tj_compliance_export($1) AS bundle`,
+      `SELECT tj_compliance_export(CAST($1 AS uuid)) AS bundle`,
       [runId]
     );
     return res.rows[0]?.bundle ?? null;
@@ -77,7 +77,7 @@ export async function tamperWithEvent(
   await withTenant(tenantId, async (q) => {
     await q(
       `UPDATE trace_events SET output_text = $3
-         WHERE run_id = $1 AND seq = $2`,
+         WHERE run_id = CAST($1 AS uuid) AND seq = $2`,
       [runId, seq, newText]
     );
   });
