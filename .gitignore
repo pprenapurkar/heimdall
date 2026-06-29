@@ -12,3 +12,5 @@ coverage/
 *.tfstate
 *.tfstate.*
 terraform/.terraform.lock.hcl
+*.tsbuildinfo
+next-env.d.ts
