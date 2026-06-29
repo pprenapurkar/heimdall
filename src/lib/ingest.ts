@@ -54,7 +54,7 @@ export interface RunFixture {
 const DEFAULT_TENANT =
   process.env.DEFAULT_TENANT_ID ?? "00000000-0000-0000-0000-000000000001";
 
-/** C1 — register (or update) an agent + task manifest. Computes goal embedding. */
+/** C1 - register (or update) an agent + task manifest. Computes goal embedding. */
 export async function registerManifest(
   agent: AgentManifest,
   task: TaskManifest,
@@ -124,7 +124,7 @@ export async function registerManifest(
 }
 
 /**
- * C2 + C4 — ingest a run as ordered events and extend the tamper-evident chain.
+ * C2 + C4 - ingest a run as ordered events and extend the tamper-evident chain.
  * Idempotent: clears any prior data for the run first.
  */
 export async function ingestRun(
@@ -199,7 +199,7 @@ export async function ingestRun(
             ]
       );
 
-      // C4 — extend the hash chain in SQL (sha256(prev || canonical)).
+      // C4 - extend the hash chain in SQL (sha256(prev || canonical)).
       await q(`SELECT tj_append_to_chain($1)`, [eventId]);
     }
 
@@ -210,7 +210,7 @@ export async function ingestRun(
 }
 
 // ---------------------------------------------------------------------------
-// X2 — Aurora ML in-SQL embeddings (production only, EMBEDDING_PROVIDER=aurora_ml).
+// X2 - Aurora ML in-SQL embeddings (production only, EMBEDDING_PROVIDER=aurora_ml).
 // "The database itself performs the inference." Requires the aws_ml extension,
 // an IAM role with Bedrock access, and VPC networking (see DEPLOY.md). Never
 // exercised locally; the local/openai paths above are the fallback.

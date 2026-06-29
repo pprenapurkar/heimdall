@@ -1,7 +1,7 @@
 /**
- * C4 — Tamper-evident audit chain verification. The chain is built and verified
+ * C4 - Tamper-evident audit chain verification. The chain is built and verified
  * in SQL (tj_append_to_chain / tj_verify_chain). The DB is the integrity source
- * of truth — this module surfaces the verify result and a demo tamper helper.
+ * of truth - this module surfaces the verify result and a demo tamper helper.
  */
 import "./env";
 import { withTenant } from "./db";
@@ -46,7 +46,7 @@ export async function verifyChain(
 }
 
 /**
- * X4 — Compliance Evidence Export. Assemble the EU AI Act Article 12 audit bundle
+ * X4 - Compliance Evidence Export. Assemble the EU AI Act Article 12 audit bundle
  * in SQL (tj_compliance_export): who/what/when/why + findings + cost + per-event
  * hashes. Returned as a JSONB document the app streams to the regulator as-is.
  */

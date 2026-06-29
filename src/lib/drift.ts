@@ -1,5 +1,5 @@
 /**
- * C3 — Drift detection. The actual logic lives in SQL (tj_detect_drift in
+ * C3 - Drift detection. The actual logic lives in SQL (tj_detect_drift in
  * db/schema.sql): deterministic array/relational rules + pgvector `<=>` semantic
  * similarity, rolled into a verdict. This module just invokes it and reads back.
  */

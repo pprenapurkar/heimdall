@@ -1,9 +1,9 @@
 -- ============================================================================
--- TraceJudge — Aurora PostgreSQL schema (the product IS the database)
+-- TraceJudge - Aurora PostgreSQL schema (the product IS the database)
 -- ----------------------------------------------------------------------------
 -- This file is idempotent: safe to re-apply. It defines the relational intent
 -- store, the OTel-GenAI-aligned trace store, the tamper-evident hash chain, the
--- drift rules engine, and the verdict roll-up — with the hard logic living in
+-- drift rules engine, and the verdict roll-up - with the hard logic living in
 -- SQL, not the app layer.
 --
 -- Runs on the local Docker pgvector/pgvector:pg16 image AND on Aurora
@@ -76,7 +76,7 @@ CREATE INDEX IF NOT EXISTS idx_trace_events_embedding
   ON trace_events USING hnsw (event_embedding vector_cosine_ops);
 
 -- ----------------------------------------------------------------------------
--- 3. WHY we trust it — tamper-evident hash chain  [C4]
+-- 3. WHY we trust it - tamper-evident hash chain  [C4]
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS audit_chain (
   event_id      uuid PRIMARY KEY REFERENCES trace_events(event_id),
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS drift_checks (
 CREATE INDEX IF NOT EXISTS idx_drift_checks_run ON drift_checks (run_id);
 
 -- ============================================================================
--- ROW-LEVEL SECURITY — every tenant sees only its own rows.
+-- ROW-LEVEL SECURITY - every tenant sees only its own rows.
 -- Policies key off the per-transaction GUC app.tenant_id (set by src/lib/db.ts
 -- withTenant()). FORCE makes RLS apply even to the table owner, so the
 -- isolation is real, not cosmetic.
@@ -136,7 +136,7 @@ CREATE POLICY tenant_isolation ON audit_chain
   WITH CHECK (EXISTS (SELECT 1 FROM trace_events te WHERE te.event_id = audit_chain.event_id));
 
 -- ============================================================================
--- APPLICATION ROLE — RLS is only meaningful when queries run as a NON-superuser
+-- APPLICATION ROLE - RLS is only meaningful when queries run as a NON-superuser
 -- (superusers and BYPASSRLS roles ignore RLS even with FORCE). withTenant() does
 -- `SET LOCAL ROLE tracejudge_app` per transaction so tenant isolation is real on
 -- both the local superuser connection and the Aurora master connection.
@@ -158,7 +158,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT EXECUTE ON FUNCTIONS TO tracejudge_app;
 
 -- ============================================================================
--- HASH CHAIN  [C4] — the DB is the integrity source of truth.
+-- HASH CHAIN  [C4] - the DB is the integrity source of truth.
 -- ----------------------------------------------------------------------------
 -- Canonical, order-stable serialization of one event. jsonb::text emits keys in
 -- a deterministic order, so the same logical event always hashes identically.
@@ -244,7 +244,7 @@ RETURNS TABLE (
 $$;
 
 -- ============================================================================
--- DRIFT ENGINE  [C3] — deterministic rules + pgvector semantic similarity,
+-- DRIFT ENGINE  [C3] - deterministic rules + pgvector semantic similarity,
 -- all evaluated in SQL. Idempotent: clears and recomputes for the run.
 -- Rolls per-event findings into agent_runs.verdict (green/yellow/red).
 -- ============================================================================
@@ -264,7 +264,7 @@ BEGIN
 
   DELETE FROM drift_checks WHERE run_id = p_run_id;
 
-  -- RULE 1: unauthorized_tool — a tool used that is not in the allowed list.
+  -- RULE 1: unauthorized_tool - a tool used that is not in the allowed list.
   -- Array membership via = ANY(...), never NOT IN on an array.
   INSERT INTO drift_checks (run_id, tenant_id, check_type, severity, evidence_event, explanation)
   SELECT p_run_id, v_tenant, 'unauthorized_tool', 'critical', te.event_id,
@@ -275,7 +275,7 @@ BEGIN
     AND te.tool_name IS NOT NULL
     AND NOT (te.tool_name = ANY (v_task.allowed_tools));
 
-  -- RULE 2: prohibited_action — an event whose tool/type is explicitly banned.
+  -- RULE 2: prohibited_action - an event whose tool/type is explicitly banned.
   INSERT INTO drift_checks (run_id, tenant_id, check_type, severity, evidence_event, explanation)
   SELECT p_run_id, v_tenant, 'prohibited_action', 'critical', te.event_id,
          format('Action "%s" is explicitly prohibited for this task.',
@@ -285,7 +285,7 @@ BEGIN
     AND (te.tool_name = ANY (v_task.prohibited_actions)
          OR te.event_type = ANY (v_task.prohibited_actions));
 
-  -- RULE 3: prohibited_data — banned data keyword appears in the output.
+  -- RULE 3: prohibited_data - banned data keyword appears in the output.
   INSERT INTO drift_checks (run_id, tenant_id, check_type, severity, evidence_event, explanation)
   SELECT p_run_id, v_tenant, 'prohibited_data', 'critical', te.event_id,
          format('Output references prohibited data category "%s".', pd)
@@ -296,7 +296,7 @@ BEGIN
     AND te.output_text IS NOT NULL
     AND te.output_text ILIKE '%' || replace(pd, '_', ' ') || '%';
 
-  -- RULE 4: missing_step / missing_evidence — a required step never happened.
+  -- RULE 4: missing_step / missing_evidence - a required step never happened.
   -- 'evidence_retrieved' surfaces as the dedicated missing_evidence check_type.
   INSERT INTO drift_checks (run_id, tenant_id, check_type, severity, explanation)
   SELECT p_run_id, v_tenant,
@@ -309,7 +309,7 @@ BEGIN
     WHERE te.run_id = p_run_id AND te.event_type = rs
   );
 
-  -- RULE 5: semantic_drift — pgvector cosine DISTANCE between the task goal
+  -- RULE 5: semantic_drift - pgvector cosine DISTANCE between the task goal
   -- embedding and each substantive event embedding exceeds the threshold.
   INSERT INTO drift_checks (run_id, tenant_id, check_type, severity, evidence_event, score, explanation)
   SELECT p_run_id, v_tenant, 'semantic_drift',
@@ -340,7 +340,7 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- CIRCUIT BREAKER  [X3] — evaluate halt policy in the DB. If tripped, flip the
+-- CIRCUIT BREAKER  [X3] - evaluate halt policy in the DB. If tripped, flip the
 -- run to 'halted', record the reason, and write a synthetic blocked-action
 -- event into the trace + audit chain so the block itself is tamper-evident.
 -- ============================================================================
@@ -404,8 +404,8 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- COST-AFTER-DRIFT ATTRIBUTION  [X1] — window/FILTER aggregation in SQL.
--- "We don't just say it drifted — we show how much was spent after it did."
+-- COST-AFTER-DRIFT ATTRIBUTION  [X1] - window/FILTER aggregation in SQL.
+-- "We don't just say it drifted - we show how much was spent after it did."
 -- ============================================================================
 CREATE OR REPLACE FUNCTION tj_cost_after_drift(p_run_id uuid)
 RETURNS TABLE (
@@ -445,7 +445,7 @@ $$;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO tracejudge_app;
 
 -- ============================================================================
--- COMPLIANCE EVIDENCE EXPORT  [X4] — assemble an EU AI Act Article 12 audit
+-- COMPLIANCE EVIDENCE EXPORT  [X4] - assemble an EU AI Act Article 12 audit
 -- bundle entirely in SQL: WHO (agent) / WHAT (task policy) / WHEN (run) / WHY
 -- (the verified hash chain) + findings + cost attribution + the full event log
 -- with per-event hashes. A regulator can independently recompute the chain.
@@ -454,7 +454,7 @@ CREATE OR REPLACE FUNCTION tj_compliance_export(p_run_id uuid)
 RETURNS jsonb LANGUAGE sql STABLE AS $$
   SELECT jsonb_build_object(
     'document', 'TraceJudge compliance evidence bundle',
-    'standard', 'EU AI Act Article 12 — automatic recording of events (logging)',
+    'standard', 'EU AI Act Article 12 - automatic recording of events (logging)',
     'generated_at', now(),
     'run_id', r.run_id,
     'tenant_id', r.tenant_id,

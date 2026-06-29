@@ -95,7 +95,7 @@ export function AuditPanel({
       ) : (
         <div className="notice bad">
           Recomputed hash diverges from the stored chain at seq {result.tampered_at}. An edit was
-          made without re-signing — the tampering is exposed. Click “Reset demo” to restore.
+          made without re-signing - the tampering is exposed. Click “Reset demo” to restore.
         </div>
       )}
     </div>

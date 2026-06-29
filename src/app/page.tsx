@@ -22,7 +22,7 @@ export default async function Home() {
         <span className="tag">agent flight recorder · Aurora PostgreSQL</span>
       </div>
       <p className="subhead">
-        We don’t use the database as storage — we use it as the agent control plane:
+        We don’t use the database as storage - we use it as the agent control plane:
         trace store, semantic judge, policy engine, and tamper-evident audit ledger.
         Each run below was scored entirely in SQL (JSONB traces, pgvector similarity,
         relational policy rules, and a sha256 hash chain).

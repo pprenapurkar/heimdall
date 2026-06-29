@@ -1,5 +1,5 @@
 /**
- * X4 — Compliance Evidence Export. The Art. 12 bundle is assembled in SQL and
+ * X4 - Compliance Evidence Export. The Art. 12 bundle is assembled in SQL and
  * must carry who/what/when/why (verified chain) + findings + cost + per-event
  * hashes, and reflect tamper state honestly.
  */

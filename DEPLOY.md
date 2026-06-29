@@ -1,4 +1,4 @@
-# DEPLOY.md — provision Aurora + ship to Vercel
+# DEPLOY.md - provision Aurora + ship to Vercel
 
 Step-by-step for taking the locally-verified TraceJudge to production: Aurora
 PostgreSQL Serverless v2 (reached over the RDS Data API) + the Next.js frontend on
@@ -48,7 +48,7 @@ psql "host=$(terraform output -raw cluster_endpoint) user=tracejudge dbname=trac
 ```
 
 `db/schema.sql` is idempotent and creates `vector` + `pgcrypto`, all tables, RLS
-policies, and the SQL functions — identical to local.
+policies, and the SQL functions - identical to local.
 
 **For the Aurora ML path (X2 only):** also enable the in-SQL inference extension:
 
@@ -75,7 +75,7 @@ npx tsx scripts/seed.ts
 > Use `EMBEDDING_PROVIDER=local` first to confirm the wiring, then switch to
 > `aurora_ml` (and set `SEMANTIC_DRIFT_THRESHOLD=0.45`, `CB_DRIFT_SCORE_HALT=0.75`)
 > once Bedrock access is confirmed. The `aurora_ml` path computes embeddings in SQL
-> via `aws_bedrock.invoke_model_get_embeddings` — no app-side embedding calls.
+> via `aws_bedrock.invoke_model_get_embeddings` - no app-side embedding calls.
 
 ## 4. Deploy the frontend to Vercel
 
@@ -83,7 +83,7 @@ npx tsx scripts/seed.ts
 vercel link           # create/link the project
 ```
 
-Set the project **Environment Variables** (Production) — no AWS keys:
+Set the project **Environment Variables** (Production) - no AWS keys:
 
 | Var | Value |
 |---|---|
@@ -103,7 +103,7 @@ Set the project **Environment Variables** (Production) — no AWS keys:
    AWS account. This issues short-lived credentials to the deployment at runtime.
 2. Create an AWS IAM role trusting Vercel's OIDC provider with a policy allowing
    `rds-data:*` on the cluster and `secretsmanager:GetSecretValue` on the secret
-   (and `bedrock:InvokeModel` if using `aurora_ml` from the app — not needed when
+   (and `bedrock:InvokeModel` if using `aurora_ml` from the app - not needed when
    embeddings run inside Aurora).
 3. Set the role ARN per the integration's instructions. The `@aws-sdk/client-rds-data`
    client in `src/lib/db.ts` picks up these credentials automatically.
@@ -126,7 +126,7 @@ cd terraform
 terraform apply -var='publicly_accessible=false' -var='admin_cidrs=[]'
 ```
 
-The Vercel app keeps working — it never used the public endpoint, only the Data API.
+The Vercel app keeps working - it never used the public endpoint, only the Data API.
 
 ## Submission deliverables
 

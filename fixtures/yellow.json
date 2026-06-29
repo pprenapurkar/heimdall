@@ -1,5 +1,5 @@
 {
-  "comment": "YELLOW run — issues a refund but SKIPS the required evidence-retrieval step (no refund_policy_lookup / evidence_retrieved event). Expected: missing_evidence (warn), verdict yellow.",
+  "comment": "YELLOW run - issues a refund but SKIPS the required evidence-retrieval step (no refund_policy_lookup / evidence_retrieved event). Expected: missing_evidence (warn), verdict yellow.",
   "run_id": "bbbbbbbb-0000-0000-0000-000000000002",
   "task_id": "22222222-2222-2222-2222-222222222222",
   "label": "Refund without evidence",

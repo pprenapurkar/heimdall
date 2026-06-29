@@ -1,5 +1,5 @@
 /**
- * X3 — Circuit breaker. Halt policy is evaluated in SQL (tj_circuit_breaker):
+ * X3 - Circuit breaker. Halt policy is evaluated in SQL (tj_circuit_breaker):
  * any unauthorized tool, over-budget cost, drift above the halt threshold, or
  * too many errors flips the run to 'halted' and records a tamper-evident
  * blocked-action event. Turns the dashboard into a control system.

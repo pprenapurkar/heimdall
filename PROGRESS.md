@@ -2,7 +2,7 @@
 
 Living status log. Newest entries at the bottom.
 
-## ✅ Backend pipeline complete & verified (C1–C4, X1, X3)
+## ✅ Backend pipeline complete & verified (C1-C4, X1, X3)
 
 **Done**
 - Scaffold: Next.js config, TS, Docker `pgvector/pgvector:pg16`, env loader, two DB

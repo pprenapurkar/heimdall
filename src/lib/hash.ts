@@ -2,7 +2,7 @@
  * Hashing helpers.
  *
  * NOTE: the authoritative hash chain is computed and verified INSIDE Postgres
- * (tj_append_to_chain / tj_verify_chain in db/schema.sql) — the database is the
+ * (tj_append_to_chain / tj_verify_chain in db/schema.sql) - the database is the
  * integrity source of truth, per CLAUDE.md C4. These TS helpers exist only as a
  * cross-check / reference and for any app-side canonicalization needs. The
  * canonical form here mirrors tj_canonical_event() so an external auditor could

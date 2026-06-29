@@ -9,7 +9,7 @@
  *                   while a competitor-pricing event drifts away. That makes the
  *                   pgvector `<=>` semantic-drift rule meaningful locally.
  *   - "openai"    : text-embedding-3-small via the OpenAI API (needs OPENAI_API_KEY).
- *   - "aurora_ml" : embeddings are NOT computed here — they are generated inside
+ *   - "aurora_ml" : embeddings are NOT computed here - they are generated inside
  *                   Aurora with aws_bedrock.invoke_model_get_embeddings during
  *                   ingest (see src/lib/ingest.ts). This module just reports the
  *                   mode so ingest knows to defer to SQL. "The database performs
@@ -45,7 +45,7 @@ export async function embed(texts: string[]): Promise<number[][]> {
   if (provider === "aurora_ml")
     throw new Error(
       "EMBEDDING_PROVIDER=aurora_ml: embeddings are computed in-SQL via aws_bedrock; " +
-        "do not call embed() — use the SQL path in ingest.ts."
+        "do not call embed() - use the SQL path in ingest.ts."
     );
   return texts.map((t) => featureHashEmbedding(t, getDim()));
 }

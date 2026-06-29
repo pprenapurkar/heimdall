@@ -1,5 +1,5 @@
 /**
- * C4 DEMO — mutate one event without updating its stored hash, to prove the
+ * C4 DEMO - mutate one event without updating its stored hash, to prove the
  * chain catches silent edits. POST { seq } (defaults to 2). Synthetic data only.
  */
 import { NextResponse } from "next/server";

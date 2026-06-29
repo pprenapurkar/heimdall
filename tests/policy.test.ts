@@ -1,9 +1,9 @@
 /**
  * Coverage for the policy/control-plane features beyond the core verdict path:
- *   C1  — RLS tenant isolation (one tenant cannot see another's runs)
- *   X1  — cost-after-drift attribution
- *   X3  — circuit breaker halts + records a tamper-evident blocked event
- *   C3  — prohibited_action / prohibited_data rules fire on the red run
+ *   C1  - RLS tenant isolation (one tenant cannot see another's runs)
+ *   X1  - cost-after-drift attribution
+ *   X3  - circuit breaker halts + records a tamper-evident blocked event
+ *   C3  - prohibited_action / prohibited_data rules fire on the red run
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { seedTenant, type SeededTenant } from "./helpers";

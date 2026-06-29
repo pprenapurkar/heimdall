@@ -1,5 +1,5 @@
 /**
- * C4 — Tamper-Evident Audit Chain. Verifies the SQL hash chain is consistent,
+ * C4 - Tamper-Evident Audit Chain. Verifies the SQL hash chain is consistent,
  * detects mutation of any event, localizes the tamper, and recovers on re-ingest.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";

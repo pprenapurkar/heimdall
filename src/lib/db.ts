@@ -2,7 +2,7 @@
  * Database access layer.
  *
  * TraceJudge's thesis is "the database is the product", so the app holds almost
- * no business logic — it ships SQL to Postgres and renders the result. This
+ * no business logic - it ships SQL to Postgres and renders the result. This
  * module is the single seam between the app and the DB.
  *
  * Two backends, selected by DB_MODE:
@@ -56,7 +56,7 @@ export async function query<T = Record<string, unknown>>(
 /**
  * Run `fn` inside a transaction with RLS tenant context set. Every query issued
  * through the provided `q` runs as that tenant, so RLS enforces isolation at the
- * database — not in app code.
+ * database - not in app code.
  */
 export async function withTenant<T>(
   tenantId: string,
@@ -104,7 +104,7 @@ export async function closePool(): Promise<void> {
 // ---------------------------------------------------------------------------
 // Connection-free: each call is an HTTPS request, so it survives serverless
 // scale-to-zero without exhausting a PG connection pool. The Data API speaks
-// the same SQL as the local path, so the SQL strings above are unchanged — only
+// the same SQL as the local path, so the SQL strings above are unchanged - only
 // parameter marshalling differs. Tenant context is set with the same
 // set_config() call, batched into the same transaction via transactionId.
 //

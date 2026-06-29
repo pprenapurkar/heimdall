@@ -1,7 +1,7 @@
 /**
  * Apply db/schema.sql to the configured database. Idempotent.
  * Local only (DB_MODE=local). For Aurora, the same file is applied during
- * provisioning — see DEPLOY.md.
+ * provisioning - see DEPLOY.md.
  */
 import "../src/lib/env";
 import { readFileSync } from "node:fs";

@@ -1,5 +1,5 @@
 /**
- * Acceptance harness — proves the pipeline behaves on all three fixtures and
+ * Acceptance harness - proves the pipeline behaves on all three fixtures and
  * that the audit chain detects tampering. Run after `npm run db:reset`.
  *
  *   green  -> verdict green, zero drift

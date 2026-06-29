@@ -1,7 +1,7 @@
 # BLOCKERS
 
 No hard blockers. The full pipeline builds, runs, and is verified locally. The items
-below are **expected boundaries** of a local-first build, not failures — each has a
+below are **expected boundaries** of a local-first build, not failures - each has a
 ready path forward documented in DEPLOY.md.
 
 ## Boundaries (by design, not blocking)
@@ -24,8 +24,8 @@ ready path forward documented in DEPLOY.md.
 
 - Aurora master is an `rds_superuser`; confirm RLS still enforces after deploy by
   running `tests/policy.test.ts` semantics (the `SET LOCAL ROLE tracejudge_app` in
-  `withTenant()` handles this — see DECISIONS.md D7). If isolation looks off, verify
+  `withTenant()` handles this - see DECISIONS.md D7). If isolation looks off, verify
   `GRANT tracejudge_app TO current_user` succeeded during schema apply.
 - When switching to real embeddings, set `SEMANTIC_DRIFT_THRESHOLD=0.45` and
   `CB_DRIFT_SCORE_HALT=0.75` (the 0.80/0.90 values are calibrated for local
-  feature-hashing — see DECISIONS.md D4).
+  feature-hashing - see DECISIONS.md D4).

@@ -1,5 +1,5 @@
 /**
- * X4 — Compliance Evidence Export. Returns the EU AI Act Art. 12 audit bundle
+ * X4 - Compliance Evidence Export. Returns the EU AI Act Art. 12 audit bundle
  * (assembled in SQL) as a downloadable JSON file. The bundle embeds the live
  * hash-chain verification so a regulator can independently recompute it.
  */

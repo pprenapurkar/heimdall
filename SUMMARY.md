@@ -1,9 +1,9 @@
-# SUMMARY — TraceJudge build status
+# SUMMARY - TraceJudge build status
 
-**Status: complete and verified locally.** Every Phase-1 Core feature (C1–C5) and the
+**Status: complete and verified locally.** Every Phase-1 Core feature (C1-C5) and the
 high-ROI Phase-2 extensions (X1 cost-after-drift, X3 circuit breaker) are built,
 runnable, and tested against a real Postgres. X2 (Aurora ML in-SQL) is written and
-flag-gated for the Aurora deploy. The North Star holds: the hard logic lives in SQL —
+flag-gated for the Aurora deploy. The North Star holds: the hard logic lives in SQL -
 the app is a thin renderer.
 
 ## What works (run it yourself)
@@ -41,7 +41,7 @@ npm run build             # production build succeeds (Vercel-ready)
 - **Tamper proof**: editing any event makes `tj_verify_chain` fail at that exact seq;
   re-ingest restores it.
 - **RLS**: an empty tenant sees 0 rows; cross-tenant reads return null (genuinely
-  enforced via a non-superuser role — see DECISIONS.md D7).
+  enforced via a non-superuser role - see DECISIONS.md D7).
 
 ## How the database does the hard part (the thesis)
 - Policy-as-data + **RLS** (FORCE + app role) for multi-tenancy.
@@ -52,10 +52,10 @@ npm run build             # production build succeeds (Vercel-ready)
 - Drift, verdict, breaker, and verification are all **SQL functions**.
 
 ## What's left for you (operator)
-1. **Provision Aurora** (`terraform/`) and **apply the schema** — DEPLOY.md §1–2.
+1. **Provision Aurora** (`terraform/`) and **apply the schema** - DEPLOY.md §1-2.
 2. **Seed over the Data API** and optionally flip `EMBEDDING_PROVIDER=aurora_ml`
-   (with `aws_ml` extension) — DEPLOY.md §3.
-3. **Deploy to Vercel** with Marketplace OIDC (no AWS keys) — DEPLOY.md §4.
+   (with `aws_ml` extension) - DEPLOY.md §3.
+3. **Deploy to Vercel** with Marketplace OIDC (no AWS keys) - DEPLOY.md §4.
 4. **Capture deliverables**: app link, architecture diagram (README Mermaid),
    DB-proof screenshot (`npm run db:proof`), public repo, **Vercel Team ID**.
 5. **Record the < 3-min video** (CLAUDE.md §10) and **publish `WRITEUP.md`** tagged

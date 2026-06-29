@@ -3,7 +3,7 @@
  * product, so we test the SQL, not a mock). Each suite uses its own tenant id so
  * RLS keeps it isolated from the demo seed and from other suites.
  *
- * Primary keys (agent_id/task_id/run_id) are GLOBALLY unique in the schema — in a
+ * Primary keys (agent_id/task_id/run_id) are GLOBALLY unique in the schema - in a
  * real system each belongs to exactly one tenant. The fixtures carry one tenant's
  * canonical IDs, so to safely seed the SAME fixtures under multiple test tenants
  * we namespace those IDs per tenant (deterministically). This avoids PK collisions

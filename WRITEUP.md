@@ -1,109 +1,63 @@
-# Building TraceJudge: using Aurora PostgreSQL as an AI-agent control plane #H0Hackathon
+# How I built TraceJudge: using Aurora PostgreSQL as the brain, not the bucket
 
-*Draft build write-up. Publish on a public platform (dev.to / Hashnode / LinkedIn /
-Medium) tagged **#H0Hackathon**. Add your demo video + live URL before posting.*
+*This is my build write-up for the H0 hackathon. I made TraceJudge as my entry. Stack is Amazon Aurora PostgreSQL plus a Next.js frontend on Vercel. #H0Hackathon*
 
----
+I kept coming back to one question while watching teams ship AI agents into real workflows: after an agent finishes a task, can you actually prove what it did? Most setups can't. The logs are just rows in a table that anyone with write access can edit. There's no judgment about whether the agent stayed inside its lane, and there's no way to show a record wasn't tampered with after the fact.
 
-## The problem nobody can answer yet
+That bothered me enough to build something for it.
 
-We're shipping AI agents into refunds, claims, IT, and finance — workflows where a
-wrong action costs money or breaks a law. But ask the obvious question after an agent
-run — *"did it do what it was allowed to do, and can you prove the record wasn't
-edited?"* — and most stacks can't answer. App logs are mutable. A screenshot isn't
-evidence.
+## What it does
 
-This isn't hypothetical. The **EU AI Act, Article 12** (enforceable Aug 2, 2026)
-requires high-risk AI systems to keep automatic, traceable, **tamper-evident**
-records. Penalties run to €15M / 3% of global turnover. Standard logging doesn't
-satisfy it.
+TraceJudge is a flight recorder for agents. You register what an agent is allowed to do (its goal, the tools it may call, the steps it must take, the actions and data that are off limits, its budget). Then you feed it the trace of what the agent actually did. It decides whether the agent drifted, and it writes a verdict you can trust because the whole record is hash-chained and verifiable.
 
-## The idea: make the database the judge
+I picked the B2B angle because this is most urgent for regulated teams. The EU AI Act's Article 12 becomes enforceable on August 2, 2026, and it requires high-risk AI systems to keep automatic, tamper-evident logs. Ordinary application logging does not meet that bar. The fines go up to 15 million euros or 3 percent of global turnover, so this is not a nice-to-have for the companies it applies to.
 
-TraceJudge is a **flight recorder for agents**. It registers what an agent was
-*allowed* to do, ingests what it *actually* did, decides whether it **drifted**, and
-writes a **tamper-evident** verdict.
+## The decision that shaped everything
 
-The bet that shaped every decision:
+I made one rule for myself early on: if a feature could be done just as well with a JSON file and some app code, I was doing it wrong. The database had to be the thing doing the real work. So Aurora PostgreSQL is not storage sitting behind an API in this project. It is the trace store, the policy engine, the judge, and the audit ledger. The TypeScript app mostly ships SQL and renders what comes back.
 
-> Don't use Aurora PostgreSQL as storage behind an app. Use it as the **control
-> plane** — trace store, semantic judge, policy engine, and audit ledger.
+That sounds like a slogan, so here is what it actually means in the code.
 
-If a feature could be done just as well with a JSON file or a generic ORM call, it was
-built wrong. So the hard parts live in SQL.
+## Where the database does the hard part
 
-## How the database does the hard part
+**Policy as data, with real row-level security.** The agent's declared intent lives in plain relational tables. Each tenant table has an RLS policy keyed on a per-transaction setting, with FORCE turned on. I hit a good lesson here: Postgres superusers ignore RLS even with FORCE, and the local Docker user is a superuser, so my first isolation test passed when it should have failed. The fix was to have each tenant transaction drop to a non-superuser role before running queries. After that, an empty tenant genuinely sees zero rows, which my tests now check.
 
-**1. Policy-as-data + Row-Level Security.** Declared intent (allowed tools, required
-steps, prohibited actions, budget) is relational data in `agents`/`tasks`. Every table
-has an RLS policy keyed on a per-transaction `app.tenant_id` GUC, with
-`FORCE ROW LEVEL SECURITY` so isolation applies even to the table owner — real
-multi-tenancy enforced by the database, not by hopeful `WHERE` clauses.
+**One trace table that is both flexible and queryable.** Every event keeps the full span as JSONB and the important fields (model, tokens, cost) as typed columns aligned to the OpenTelemetry GenAI conventions. So I get a flexible document store and a fast relational timeline from the same table.
 
-**2. Trace store: JSONB + typed columns, OTel-aligned.** Each event keeps the full
-span as `jsonb` *and* typed `gen_ai.*` columns (model, tokens, cost). One table is
-both a flexible document store and a queryable relational timeline.
+**Drift detection in a single SQL function.** This runs the deterministic checks (a tool that was not allowed, a required step that never happened, a banned action or data category) alongside a semantic check using pgvector cosine distance between the task goal and each event. The array checks use `= ANY(...)` rather than `NOT IN`, and the similarity uses the `<=>` operator. It all rolls up into a green, yellow, or red verdict in the same query path.
 
-**3. Drift detection in one SQL function.** `tj_detect_drift()` runs five rule
-families and rolls up a verdict:
+**A hash chain that the database verifies itself.** On insert, each event's hash is sha256 of the previous hash concatenated with a canonical form of the event, computed with pgcrypto. Verification is a recursive CTE that recomputes the entire chain and compares it to what's stored. If anyone edits a single byte of any event, the recomputed hash stops matching at exactly that step. In the demo I prove it live: a button silently edits one event, the audit badge flips to "tamper detected" at that step, and a reset restores a clean chain.
 
-- `unauthorized_tool` via array membership — `NOT (tool = ANY(allowed_tools))`
-  (never `NOT IN` on an array).
-- `prohibited_action` / `prohibited_data` matched against policy arrays / output text.
-- `missing_evidence` via `NOT EXISTS` on the required step.
-- `semantic_drift` via **pgvector** cosine distance — `event_embedding <=> goal_embedding`.
+**Cost attribution with a window function.** One aggregation with a FILTER clause splits the run's spend into before and after the first drift. On my red run that comes out to about 88 percent of the money spent after the agent had already gone off track, which is a much better story than just saying "it drifted."
 
-Deterministic policy rules and vector similarity, evaluated in the same query plan.
+**A circuit breaker as a SQL state machine.** If a run uses an unauthorized tool, blows its budget, drifts badly, or errors too often, a function halts the run and writes the blocked action into the hash chain too, so even the intervention is part of the auditable record.
 
-**4. A tamper-evident hash chain — verified in SQL.** On insert,
-`current_hash = sha256(prev_hash || canonical(event))` using `pgcrypto`. Verification
-is a **recursive CTE** that recomputes the whole chain and compares to stored hashes.
-Edit any byte of any event and the recomputed hash diverges at exactly that step. The
-demo proves it live: a "Tamper" button silently edits an event, the audit badge flips
-to **Tamper detected at seq N**, and "Reset" restores a verifiable chain.
+**A compliance export built in SQL.** One function assembles the whole Article 12 bundle as a single JSON document: who the agent was, what it was allowed to do, when it ran, why the record can be trusted (the verified chain), plus findings, cost, and per-event hashes. A regulator could recompute the chain independently.
 
-**5. Cost-after-drift, in one window aggregation.**
-`SUM(cost) FILTER (WHERE seq >= first_drift)` turns "it drifted" into "**87.5% of the
-spend happened *after* it drifted.**"
+## A couple of engineering notes
 
-**6. A circuit breaker that's a SQL state machine.** `tj_circuit_breaker()` halts a run
-on an unauthorized tool, over-budget cost, severe drift, or repeated errors — and writes
-the *blocked action itself* into the hash chain, so even the intervention is auditable.
+I wanted the project to run end to end with no API keys so anyone could clone it and see the real pipeline, not a mock. For that I wrote a deterministic local embedding using feature hashing, so text that shares vocabulary lands close in cosine space. A refund event stays near a refund goal while a competitor-pricing event drifts away. The real providers (OpenAI, and Aurora's own in-SQL Bedrock calls) sit behind an environment flag. One honest caveat: lexical hashing shifts the cosine scale, so the local threshold is tuned higher than the value I use with real embeddings. The score is always a real cosine distance; only the cutoff tracks the provider.
 
-## Engineering choices worth calling out
+For talking to Aurora from Vercel I used the RDS Data API instead of a normal connection pool, since serverless functions and pooled Postgres connections do not get along. Auth comes through Vercel's AWS OIDC integration, so there are no AWS keys anywhere in the repo.
 
-- **Connection-free Aurora.** The Vercel app talks to Aurora over the **RDS Data API**,
-  so serverless scale-to-zero never exhausts a PG connection pool. AWS auth comes from
-  **Vercel Marketplace OIDC** — zero credentials in the repo.
-- **Runs 100% offline for development.** A deterministic **feature-hashing embedding**
-  provider makes the pgvector semantic-drift path work with no API keys, so the entire
-  ingest → score → hash → verdict pipeline is real even locally. Real embeddings
-  (OpenAI, or **Aurora ML calling Bedrock from inside SQL**) sit behind an env flag.
-- **The DB is what we test.** Integration tests run against real Postgres in isolated
-  RLS tenants — we test the SQL, because the SQL *is* the product. 9/9 tests + a
-  17/17 acceptance harness green on the three demo runs.
+And because I believe the database is the product, my tests run against a real Postgres in isolated tenants rather than against mocks. There are 35 of them covering the drift rules, the hash chain and tamper detection, RLS isolation, cost attribution, the breaker, and the export.
 
-## The demo in 20 seconds
+## The demo
 
-Three seeded refund-agent runs:
-- 🟢 **green** — reads the order, retrieves policy evidence, refunds within limit. Clean.
-- 🟡 **yellow** — refunds but skips evidence retrieval → `missing_evidence`.
-- 🔴 **red** — calls an unauthorized competitor-pricing tool, writes unsupported memory,
-  attempts an over-limit refund → `unauthorized_tool` + `semantic_drift`, **breaker
-  halts**, **87.5% of spend wasted after drift**.
+Three seeded refund-agent runs tell the whole story:
 
-Then: tamper an event → the chain catches it at the exact step.
+- Green: reads the order, retrieves the policy as evidence, refunds within the limit. Clean.
+- Yellow: refunds but skips the evidence step, so it gets flagged for missing evidence.
+- Red: calls an unauthorized competitor-pricing tool, writes an unsupported note to memory, and tries an over-limit refund. It comes back red with an unauthorized-tool and a semantic-drift finding, the breaker halts it, and the cost panel shows how much was wasted after it went wrong.
 
-## What's next
+Then I tamper with an event and the chain catches it at the exact step.
 
-Memory governance, replay of a past run under stricter policy via **Aurora fast-clone**,
-live OTel ingestion from real LangChain/CrewAI agents, and multi-region via Aurora DSQL.
+## What I would build next
+
+Memory governance for what an agent reads and writes, replaying a past run under a stricter policy using Aurora's fast clone, and ingesting live traces from real LangChain or CrewAI agents instead of fixtures.
 
 ## Takeaway
 
-Postgres did the reasoning, the policy enforcement, and the integrity proof. The app is
-a thin renderer. If you're building agent infrastructure, your database is more capable
-than you're letting it be.
+The thing I came away with is that Postgres did the reasoning, the policy enforcement, and the integrity proof, and the app stayed thin. If you are building agent infrastructure, your database can probably carry more of the load than you are giving it.
 
-*Built for the H0 Hackathon. Stack: Aurora PostgreSQL (pgvector, pgcrypto, RLS, RDS
-Data API, Aurora ML) + Next.js on Vercel.* **#H0Hackathon**
+Built for the H0 hackathon using Amazon Aurora PostgreSQL and Vercel. #H0Hackathon

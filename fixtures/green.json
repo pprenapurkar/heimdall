@@ -1,5 +1,5 @@
 {
-  "comment": "GREEN run — fully compliant. Reads order -> retrieves policy evidence -> issues refund within limit. Expected verdict: green, zero drift.",
+  "comment": "GREEN run - fully compliant. Reads order -> retrieves policy evidence -> issues refund within limit. Expected verdict: green, zero drift.",
   "run_id": "aaaaaaaa-0000-0000-0000-000000000001",
   "task_id": "22222222-2222-2222-2222-222222222222",
   "label": "Compliant refund",

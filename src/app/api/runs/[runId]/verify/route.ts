@@ -1,4 +1,4 @@
-/** C4 — recompute and verify the run's hash chain in SQL. */
+/** C4 - recompute and verify the run's hash chain in SQL. */
 import { NextResponse } from "next/server";
 import { verifyChain } from "@/lib/audit";
 import { DEMO_TENANT } from "@/lib/tenant";

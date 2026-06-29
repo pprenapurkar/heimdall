@@ -1,5 +1,5 @@
 /**
- * C3 — Drift Detection Engine. Verifies the SQL rules + pgvector semantic drift
+ * C3 - Drift Detection Engine. Verifies the SQL rules + pgvector semantic drift
  * produce the right findings and verdict roll-up on the three fixtures.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";

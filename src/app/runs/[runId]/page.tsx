@@ -73,7 +73,7 @@ export default async function RunPage({ params }: { params: { runId: string } })
             ${cost.cost_after_drift.toFixed(2)}</div><div className="l">spent AFTER drift</div></div>
           <div><div className="n" style={{ color: cost.wasted_pct > 0 ? "var(--red)" : "var(--green)" }}>
             {cost.wasted_pct}%</div><div className="l">of spend wasted post-drift</div></div>
-          <div><div className="n">{cost.first_drift_seq ?? "—"}</div><div className="l">first drift at step</div></div>
+          <div><div className="n">{cost.first_drift_seq ?? "-"}</div><div className="l">first drift at step</div></div>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default async function RunPage({ params }: { params: { runId: string } })
           <div>
             <h2 style={{ margin: 0 }}>Compliance evidence bundle</h2>
             <p className="muted small" style={{ margin: "6px 0 0" }}>
-              EU AI Act Article 12 audit bundle — who / what / when / why (verified hash
+              EU AI Act Article 12 audit bundle - who / what / when / why (verified hash
               chain) + findings + cost attribution + per-event hashes, assembled in SQL.
             </p>
           </div>

@@ -1,5 +1,5 @@
 /**
- * C2/C4 — ingest idempotency. Re-ingesting the same run must not duplicate events
+ * C2/C4 - ingest idempotency. Re-ingesting the same run must not duplicate events
  * or corrupt the hash chain (the ingest path clears the run first). Also checks
  * the OTel-aligned typed columns + JSONB are persisted.
  */
