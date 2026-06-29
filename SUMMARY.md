@@ -29,9 +29,9 @@ npm run build             # production build succeeds (Vercel-ready)
 | C4 | Tamper-evident hash chain | ✅ | `tj_append_to_chain`/`tj_verify_chain`, `audit.ts` |
 | C5 | Verdict dashboard | ✅ | `src/app/**` |
 | X1 | Cost-after-drift | ✅ | `tj_cost_after_drift()` |
-| X2 | Aurora ML in-SQL embeddings/explanations | ✍️ written, flag-gated | `ingest.ts` (`aurora_ml`) |
+| X2 | Aurora ML in-SQL embeddings/explanations | ✍️ written, flag-gated (needs Aurora) | `ingest.ts` (`aurora_ml`) |
 | X3 | Circuit breaker | ✅ | `tj_circuit_breaker()`, `breaker.ts` |
-| X4 | Compliance export | ⛔ not built (time-boxed; see CLAUDE.md §6) |
+| X4 | Compliance evidence export (Art. 12) | ✅ | `tj_compliance_export()`, `audit.ts`, `/api/runs/[id]/export` |
 
 ### Verified behavior on the 3 fixtures
 - 🟢 **green** → verdict green, 0 drift, chain verifies (len 4).

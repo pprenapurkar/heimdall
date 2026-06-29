@@ -443,3 +443,63 @@ $$;
 -- Final grant pass: ensure every function defined above is executable by the app
 -- role (covers re-applies where default privileges may not re-trigger).
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO tracejudge_app;
+
+-- ============================================================================
+-- COMPLIANCE EVIDENCE EXPORT  [X4] — assemble an EU AI Act Article 12 audit
+-- bundle entirely in SQL: WHO (agent) / WHAT (task policy) / WHEN (run) / WHY
+-- (the verified hash chain) + findings + cost attribution + the full event log
+-- with per-event hashes. A regulator can independently recompute the chain.
+-- ============================================================================
+CREATE OR REPLACE FUNCTION tj_compliance_export(p_run_id uuid)
+RETURNS jsonb LANGUAGE sql STABLE AS $$
+  SELECT jsonb_build_object(
+    'document', 'TraceJudge compliance evidence bundle',
+    'standard', 'EU AI Act Article 12 — automatic recording of events (logging)',
+    'generated_at', now(),
+    'run_id', r.run_id,
+    'tenant_id', r.tenant_id,
+    'verdict', r.verdict,
+    'who', jsonb_build_object(
+      'agent_id', a.agent_id, 'agent_name', a.name, 'owner', a.owner,
+      'risk_level', a.risk_level, 'policy_version', a.policy_version
+    ),
+    'what', jsonb_build_object(
+      'assigned_goal', t.assigned_goal, 'allowed_tools', t.allowed_tools,
+      'required_steps', t.required_steps, 'prohibited_actions', t.prohibited_actions,
+      'prohibited_data', t.prohibited_data, 'max_budget_usd', t.max_budget_usd
+    ),
+    'when', jsonb_build_object(
+      'started_at', r.started_at, 'state', r.state, 'halted_reason', r.halted_reason
+    ),
+    'why_trustworthy', jsonb_build_object(
+      'algorithm', 'sha256(prev_hash || canonical(event))',
+      'verified', (SELECT bool_and(ok) FROM tj_verify_chain(p_run_id)),
+      'chain_length', (SELECT count(*) FROM tj_verify_chain(p_run_id)),
+      'last_hash', (SELECT stored_hash FROM tj_verify_chain(p_run_id) ORDER BY seq DESC LIMIT 1)
+    ),
+    'cost_attribution', (SELECT to_jsonb(c) FROM tj_cost_after_drift(p_run_id) c),
+    'findings', (
+      SELECT coalesce(jsonb_agg(jsonb_build_object(
+        'check_type', dc.check_type, 'severity', dc.severity,
+        'score', dc.score, 'explanation', dc.explanation,
+        'evidence_seq', (SELECT seq FROM trace_events te WHERE te.event_id = dc.evidence_event)
+      ) ORDER BY dc.severity DESC), '[]'::jsonb)
+      FROM drift_checks dc WHERE dc.run_id = p_run_id
+    ),
+    'events', (
+      SELECT coalesce(jsonb_agg(jsonb_build_object(
+        'seq', te.seq, 'event_type', te.event_type, 'tool_name', te.tool_name,
+        'model', te.model, 'input_tokens', te.input_tokens, 'output_tokens', te.output_tokens,
+        'cost_usd', te.cost_usd, 'output_text', te.output_text, 'raw_event', te.raw_event,
+        'created_at', te.created_at, 'prev_hash', ac.prev_hash, 'current_hash', ac.current_hash
+      ) ORDER BY te.seq), '[]'::jsonb)
+      FROM trace_events te LEFT JOIN audit_chain ac ON ac.event_id = te.event_id
+      WHERE te.run_id = p_run_id
+    )
+  )
+  FROM agent_runs r
+  JOIN tasks t ON t.task_id = r.task_id
+  JOIN agents a ON a.agent_id = t.agent_id
+  WHERE r.run_id = p_run_id;
+$$;
+GRANT EXECUTE ON FUNCTION tj_compliance_export(uuid) TO tracejudge_app;

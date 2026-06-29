@@ -46,6 +46,24 @@ export async function verifyChain(
 }
 
 /**
+ * X4 — Compliance Evidence Export. Assemble the EU AI Act Article 12 audit bundle
+ * in SQL (tj_compliance_export): who/what/when/why + findings + cost + per-event
+ * hashes. Returned as a JSONB document the app streams to the regulator as-is.
+ */
+export async function complianceExport(
+  runId: string,
+  tenantId: string
+): Promise<Record<string, unknown> | null> {
+  return withTenant(tenantId, async (q) => {
+    const res = await q<{ bundle: Record<string, unknown> }>(
+      `SELECT tj_compliance_export($1) AS bundle`,
+      [runId]
+    );
+    return res.rows[0]?.bundle ?? null;
+  });
+}
+
+/**
  * DEMO HELPER (C4 proof): mutate one event's output_text WITHOUT recomputing its
  * stored hash. Re-running verifyChain() must then report tampered_at = that seq.
  * This is how the demo proves the record can't be silently altered.

@@ -81,6 +81,7 @@ serverless-safe), authenticated via **Vercel Marketplace OIDC** — no AWS keys 
 - **X1 Cost-After-Drift** — `SUM(cost) FILTER (WHERE seq >= first_drift)`.
 - **X2 Aurora ML In-SQL** — embeddings + explanations from `aws_bedrock.*` (flag-gated; external fallback kept).
 - **X3 Circuit Breaker** — halt on unauthorized tool / over budget / severe drift / errors; the block is itself chained.
+- **X4 Compliance Evidence Export** — EU AI Act Art. 12 audit bundle (who/what/when/why + verified hashes) assembled in SQL, downloadable per run.
 
 ## Quickstart (local, zero API keys)
 

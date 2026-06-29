@@ -144,6 +144,26 @@ export default async function RunPage({ params }: { params: { runId: string } })
         <h2>Tamper-evident audit chain (sha256 in SQL)</h2>
         <AuditPanel runId={summary.run_id} initial={audit} />
       </div>
+
+      {/* Compliance export (X4) */}
+      <div className="panel">
+        <div className="row spread wrap">
+          <div>
+            <h2 style={{ margin: 0 }}>Compliance evidence bundle</h2>
+            <p className="muted small" style={{ margin: "6px 0 0" }}>
+              EU AI Act Article 12 audit bundle — who / what / when / why (verified hash
+              chain) + findings + cost attribution + per-event hashes, assembled in SQL.
+            </p>
+          </div>
+          <a
+            className="btn"
+            href={`/api/runs/${summary.run_id}/export`}
+            download={`tracejudge-art12-${summary.run_id}.json`}
+          >
+            ↓ Export Art. 12 bundle (JSON)
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
