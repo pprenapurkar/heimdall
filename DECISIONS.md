@@ -40,12 +40,21 @@ prohibited_data, missing_step/missing_evidence, semantic_drift) and rolls up the
 verdict. Array membership uses `= ANY(...)`, never `NOT IN`. pgvector `<=>` for
 cosine distance. Logic stays in SQL per the North Star.
 
-## D7 — Row-Level Security with FORCE (C1 multi-tenancy)
+## D7 — Row-Level Security with FORCE + a non-superuser app role (C1)
 Every tenant table has an RLS policy keyed on `current_setting('app.tenant_id')`,
-and `FORCE ROW LEVEL SECURITY` so it applies even to the table owner — real
-isolation, not cosmetic. All access goes through `withTenant()` which sets the GUC
-inside the transaction. This is the stronger DB signal vs. plain `tenant_id` filters
-(the documented fallback in CLAUDE.md §9).
+and `FORCE ROW LEVEL SECURITY` so it applies even to the table owner. **Important
+gotcha discovered during testing:** Postgres superusers (and `BYPASSRLS` roles)
+ignore RLS entirely, even with FORCE — and the local Docker user *is* a superuser
+(as is the Aurora master to a degree). So `withTenant()` does
+`SET LOCAL ROLE tracejudge_app` (a `NOLOGIN`, non-superuser role created in the
+schema) per transaction before setting the GUC. This makes isolation genuinely
+enforced on both local and Aurora, verified by `tests/policy.test.ts` (an empty
+tenant sees 0 rows; cross-tenant reads return null). Stronger DB signal than the
+plain `tenant_id` filter fallback (CLAUDE.md §9).
+
+Note: PKs (`agent_id`/`task_id`/`run_id`) are globally unique (one tenant each in
+reality). Tests namespace fixture IDs per tenant (`tests/helpers.ts nsUuid`) to seed
+the same fixtures under multiple tenants without PK collisions.
 
 ## D8 — Over-limit refund is modeled as data, not a dedicated rule
 The red fixture's $500 refund carries `raw_event.over_limit=true` and the narrative

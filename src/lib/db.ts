@@ -67,6 +67,9 @@ export async function withTenant<T>(
   const client: PoolClient = await getPool().connect();
   try {
     await client.query("BEGIN");
+    // Drop to the non-superuser app role so RLS is actually enforced (superusers
+    // bypass RLS). SET LOCAL is reverted on COMMIT/ROLLBACK.
+    await client.query("SET LOCAL ROLE tracejudge_app");
     // set_config(..., true) => scoped to this transaction only.
     await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
     const q: TenantQuery = async (text, params = []) => {
@@ -186,6 +189,8 @@ async function withTenantDataApi<T>(
   );
   const txId = begin.transactionId!;
   try {
+    // Drop to the non-superuser app role so RLS is enforced (see local path).
+    await queryDataApi("SET LOCAL ROLE tracejudge_app", [], txId);
     await queryDataApi("SELECT set_config('app.tenant_id', $1, true)", [tenantId], txId);
     const q: TenantQuery = (text, params = []) => queryDataApi(text, params, txId);
     const out = await fn(q);

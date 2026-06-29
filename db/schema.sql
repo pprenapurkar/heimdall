@@ -136,6 +136,28 @@ CREATE POLICY tenant_isolation ON audit_chain
   WITH CHECK (EXISTS (SELECT 1 FROM trace_events te WHERE te.event_id = audit_chain.event_id));
 
 -- ============================================================================
+-- APPLICATION ROLE — RLS is only meaningful when queries run as a NON-superuser
+-- (superusers and BYPASSRLS roles ignore RLS even with FORCE). withTenant() does
+-- `SET LOCAL ROLE tracejudge_app` per transaction so tenant isolation is real on
+-- both the local superuser connection and the Aurora master connection.
+-- ============================================================================
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tracejudge_app') THEN
+    CREATE ROLE tracejudge_app NOLOGIN;
+  END IF;
+END $$;
+-- Let whoever applies this schema (local superuser / Aurora master) assume the role.
+GRANT tracejudge_app TO current_user;
+GRANT USAGE ON SCHEMA public TO tracejudge_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO tracejudge_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO tracejudge_app;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO tracejudge_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO tracejudge_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT EXECUTE ON FUNCTIONS TO tracejudge_app;
+
+-- ============================================================================
 -- HASH CHAIN  [C4] — the DB is the integrity source of truth.
 -- ----------------------------------------------------------------------------
 -- Canonical, order-stable serialization of one event. jsonb::text emits keys in
@@ -417,3 +439,7 @@ RETURNS TABLE (
          ELSE 0 END
   FROM agg;
 $$;
+
+-- Final grant pass: ensure every function defined above is executable by the app
+-- role (covers re-applies where default privileges may not re-trigger).
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO tracejudge_app;
