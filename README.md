@@ -8,6 +8,19 @@ The core idea: Aurora PostgreSQL is not storage behind an app here. It is the tr
 
 Why it matters: ordinary application logs are mutable and can't prove they weren't altered. The EU AI Act Article 12 (enforceable Aug 2, 2026) requires high-risk AI systems to keep automatic, traceable, tamper-evident records, with penalties up to 15M euros or 3% of global turnover. Heimdall closes that gap, and it does the hard part in the database.
 
+**Dashboard which summarizes each agent's action**
+<img width="628" height="282" alt="Screenshot 2026-07-02 at 12 13 39 PM" src="https://github.com/user-attachments/assets/5f088f38-39de-42c0-ae55-c0a3e3b7afcd" />
+**Rogue Agent**
+<img width="625" height="640" alt="Screenshot 2026-07-02 at 12 14 05 PM" src="https://github.com/user-attachments/assets/7d1ce785-d2a9-45c7-90a3-c1323bfcd057" />
+<img width="619" height="585" alt="Screenshot 2026-07-02 at 12 14 20 PM" src="https://github.com/user-attachments/assets/a0b163e5-6eff-4b1e-b330-8acb2c74005f" />
+
+**Drifted Agent**
+<img width="557" height="624" alt="Screenshot 2026-07-02 at 12 14 42 PM" src="https://github.com/user-attachments/assets/2fba72e9-ed91-4982-a2d1-86c36ab03b2c" />
+
+**Perfectly executed agent**
+<img width="466" height="575" alt="Screenshot 2026-07-02 at 12 14 59 PM" src="https://github.com/user-attachments/assets/c1e2916c-c146-461f-9a7f-0c9b2b570de7" />
+
+
 ## Why the database is the product
 
 Every feature is built so Postgres visibly does the work rather than the app layer:
@@ -109,15 +122,6 @@ On any run, the Tamper button silently edits an event and the audit badge flips 
 - `SUBMISSION.md` is the ordered runbook to deploy and submit to the H0 hackathon (every Devpost deliverable, video beats, Team ID, screenshots, write-up).
 - `DEPLOY.md` is the infra detail: provisioning Aurora Serverless v2 (Terraform in `terraform/`), enabling the Data API and Aurora ML, applying the schema, and deploying the frontend on Vercel with OIDC.
 
-## Deliverables checklist
-
-- [x] Working app (local) via `npm run dev`
-- [x] Architecture diagram (Mermaid, above)
-- [x] DB-usage proof via `npm run db:proof` (prints the SQL evidence), then screenshot
-- [x] Public repo (this repository)
-- [ ] Vercel deploy plus Team ID (operator step, see SUBMISSION.md)
-- [ ] Demo video under 3 minutes (script in CLAUDE.md section 10)
-- [ ] #H0Hackathon write-up (draft in `WRITEUP.md`)
 
 ## Future scope (designed for, not in the MVP)
 
