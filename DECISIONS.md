@@ -1,6 +1,6 @@
 # Decisions Log
 
-Autonomous build decisions, with rationale. Reference CLAUDE.md feature IDs.
+Decision logs help you understand why a decision was taken and the context behind it for future ref. Reference CLAUDE.md feature IDs.
 
 ## D1 - Local Postgres stands in for Aurora
 `pgvector/pgvector:pg16` via Docker. Aurora PostgreSQL is Postgres-16 + pgvector
